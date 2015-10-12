@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Security.Policy;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace time_delegates
 {
@@ -13,33 +8,26 @@ namespace time_delegates
 
     class CurrentTime
     {
-
-        public static event TimeChanged secondChanged;
-        public static event TimeChanged minuteChanged;
+        public static event TimeChanged SecondChanged;
+        public static event TimeChanged MinuteChanged;
 
         private static int _currentMinute = -1;
         
-        public static void TopAlignPrint()
+        public static void MainTime()
         {
-            //делаем писалку
-            //Print printEverywhere = new Print(PrintToConsole);
-            //printEverywhere += WriteToFile;
-            //делаем получалку времени
-
             while (Program.KeepOnGoing)
             {
                 PushTime();
-                System.Threading.Thread.Sleep(1000);
+                Thread.Sleep(1000);
             }
-
         }
 
         static CurrentTime()
         {
-            secondChanged += PrintToConsole;
-            secondChanged += PrintToFile;
+            SecondChanged += PrintToConsole;
+            SecondChanged += PrintToFile;
 
-            minuteChanged += AlarmArray.Execute;
+            MinuteChanged += AlarmArray.Execute;
         }
 
         private static void PrintToConsole(object source, TimeEventArgs e)
@@ -58,7 +46,7 @@ namespace time_delegates
 
         private static void PrintToFile(object source, TimeEventArgs e)
         {
-            StreamWriter f = System.IO.File.CreateText("./CurrentTime.txt");
+            StreamWriter f = File.CreateText("./CurrentTime.txt");
             f.WriteLine(e.GetString());
             f.Close();
         }
@@ -67,11 +55,11 @@ namespace time_delegates
         {
             DateTime dtNow = DateTime.Now;
             TimeEventArgs e = new TimeEventArgs();
-            secondChanged(null, e);
+            SecondChanged(null, e);
             if (dtNow.Minute != _currentMinute)
             {
                 _currentMinute = dtNow.Minute;
-                minuteChanged(null, e);
+                MinuteChanged(null, e);
             }
         }
 
