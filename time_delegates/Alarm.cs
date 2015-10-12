@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace time_delegates
 {
-    class Alarm
+    public class Alarm
     {
         public readonly DateTime Time;
         public readonly string Description;

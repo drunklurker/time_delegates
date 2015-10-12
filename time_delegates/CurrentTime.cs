@@ -2,16 +2,20 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace time_delegates
 {
+    public delegate void TimeChanged(object source, TimeEventArgs e);
+
     class CurrentTime
     {
-        private delegate void PrintToTarget(string str);
 
-        private delegate void GetTimeParts(ref string collectedTime);
+        public static event TimeChanged secondChanged;
+        public static event TimeChanged minuteChanged;
 
         private static int _currentMinute = -1;
         
@@ -21,74 +25,55 @@ namespace time_delegates
             //Print printEverywhere = new Print(PrintToConsole);
             //printEverywhere += WriteToFile;
             //делаем получалку времени
-            string time = null;
-            GetTimeParts getTime = new GetTimeParts(GetHours);
-            getTime += GetMinutes;
-            getTime += GetSeconds;
-            PrintToTarget printEverywhere = new PrintToTarget(PrintToConsole);
-            printEverywhere += PrintToFile;
 
             while (Program.KeepOnGoing)
             {
-                GetCurrentTime(getTime, ref time);
-                lock (Program.LockCrutch)
-                {
-
-                    int column = Console.CursorLeft;
-                    int row = Console.CursorTop;
-                    Console.SetCursorPosition(0, 0);
-
-                    printEverywhere(time);
-                    Console.SetCursorPosition(column, row);
-                }
-
+                PushTime();
                 System.Threading.Thread.Sleep(1000);
             }
 
         }
 
-        private static void PrintToConsole(string s)
+        static CurrentTime()
         {
-            Console.WriteLine(s);
+            secondChanged += PrintToConsole;
+            secondChanged += PrintToFile;
+
+            minuteChanged += AlarmArray.Execute;
         }
 
-        private static void PrintToFile(string s)
+        private static void PrintToConsole(object source, TimeEventArgs e)
+        {
+            lock (Program.LockCrutch)
+            {
+                int column = Console.CursorLeft;
+                int row = Console.CursorTop;
+                Console.SetCursorPosition(0, 0);
+
+                Console.WriteLine(e.GetString());
+
+                Console.SetCursorPosition(column, row);
+            }
+        }
+
+        private static void PrintToFile(object source, TimeEventArgs e)
         {
             StreamWriter f = System.IO.File.CreateText("./CurrentTime.txt");
-            f.WriteLine(s);
+            f.WriteLine(e.GetString());
             f.Close();
         }
 
-        private static void GetCurrentTime(GetTimeParts tp, ref string time)
+        private static void PushTime()
         {
-            tp(ref time);
-        }
-
-        private static void GetHours(ref string timeString)
-        {
-            timeString = DateTime.Now.Hour.ToString("D2");
-        }
-
-        private static void GetMinutes(ref string timeString)
-        {
-            int newMinute = DateTime.Now.Minute;
-            if (newMinute != _currentMinute)
+            DateTime dtNow = DateTime.Now;
+            TimeEventArgs e = new TimeEventArgs();
+            secondChanged(null, e);
+            if (dtNow.Minute != _currentMinute)
             {
-                _currentMinute = newMinute;
-                lock (Program.Alarms)
-                {
-                    foreach (Alarm alarm in Program.Alarms)
-                    {
-                        alarm.Execute(DateTime.Now.Hour, _currentMinute);
-                    }
-                }
+                _currentMinute = dtNow.Minute;
+                minuteChanged(null, e);
             }
-            timeString += String.Format(":{0}", _currentMinute.ToString("D2"));
         }
 
-        private static void GetSeconds(ref string timeString)
-        {
-            timeString += String.Format(":{0}", DateTime.Now.Second.ToString("D2"));
-        }
     }
 }

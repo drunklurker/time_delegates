@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -52,17 +53,19 @@ namespace time_delegates
 
         private static void DeleteAlarm()
         {
-            for (int i = 0; i < Program.Alarms.Count; i++)
+            for (int i = 0; i < AlarmArray.Alarms.Count; i++)
             {
-                Console.WriteLine("{0} :: {1}", i, Program.Alarms[i]);
+                Console.WriteLine("{0} :: {1}", i, AlarmArray.Alarms[i]);
             }
             Console.WriteLine("Which alarm do you want to delete?");
             int deathNumber;
             if (int.TryParse(Console.ReadLine(), out deathNumber) && deathNumber >= 0 &&
-                deathNumber < Program.Alarms.Count)
-                lock (Program.Alarms)
+                deathNumber < AlarmArray.Alarms.Count)
+                lock (AlarmArray.Alarms)
                 {
-                    Program.Alarms.RemoveAt(deathNumber);
+                    string filename = "id_" + Program.Alarms[deathNumber].id + ".txt";
+                    File.Delete(filename);
+                    AlarmArray.Alarms.RemoveAt(deathNumber);
                 }
             else
                 lock (Program.LockCrutch)
@@ -83,9 +86,9 @@ namespace time_delegates
                 string description;
                 Console.WriteLine("Enter alarm description:");
                 description = Console.ReadLine();
-                lock(Program.Alarms)
+                lock(AlarmArray.Alarms)
                 {
-                    Program.Alarms.Add(new Alarm(id, hours, minutes, description));
+                    AlarmArray.Alarms.Add(new Alarm(id, hours, minutes, description));
                 }
             }
             else

@@ -45,7 +45,7 @@ namespace time_delegates
                 if (fileName.StartsWith("id_"))
                 {
                     StreamReader f = new StreamReader(String.Format("./{0}", fileName));
-                    Alarms.Add(new Alarm(f.ReadLine(), int.Parse(f.ReadLine()), int.Parse(f.ReadLine()), f.ReadLine()));
+                    AlarmArray.Alarms.Add(new Alarm(f.ReadLine(), int.Parse(f.ReadLine()), int.Parse(f.ReadLine()), f.ReadLine()));
                     f.Close();
                 }
             }
