@@ -4,12 +4,14 @@ using System.Threading;
 
 namespace time_delegates
 {
-    public delegate void TimeChanged(object source, TimeEventArgs e);
+    public delegate void MinuteDelegate(int hour, int minute);
+
+    public delegate void SecondDelegate(int hour, int minute, int second);
 
     class CurrentTime
     {
-        public static event TimeChanged SecondChanged;
-        public static event TimeChanged MinuteChanged;
+        public static SecondDelegate SecondChanged;
+        public static MinuteDelegate MinuteChanged;
 
         private static int _currentMinute = -1;
         
@@ -30,7 +32,7 @@ namespace time_delegates
             MinuteChanged += AlarmArray.Execute;
         }
 
-        private static void PrintToConsole(object source, TimeEventArgs e)
+        private static void PrintToConsole(int hour, int minute, int second)
         {
             lock (Program.LockCrutch)
             {
@@ -38,16 +40,16 @@ namespace time_delegates
                 int row = Console.CursorTop;
                 Console.SetCursorPosition(0, 0);
 
-                Console.WriteLine(e.GetString());
+                Console.WriteLine("{0:D2}:{1:D2}:{2:D2}", hour, minute, second);
 
                 Console.SetCursorPosition(column, row);
             }
         }
 
-        private static void PrintToFile(object source, TimeEventArgs e)
+        private static void PrintToFile(int hour, int minute, int second)
         {
             StreamWriter f = File.CreateText("./CurrentTime.txt");
-            f.WriteLine(e.GetString());
+            f.WriteLine("{0:D2}:{1:D2}:{2:D2}", hour, minute, second);
             f.Close();
         }
 
@@ -55,11 +57,11 @@ namespace time_delegates
         {
             DateTime dtNow = DateTime.Now;
             TimeEventArgs e = new TimeEventArgs();
-            SecondChanged(null, e);
+            SecondChanged(dtNow.Hour, dtNow.Minute, dtNow.Second);
             if (dtNow.Minute != _currentMinute)
             {
                 _currentMinute = dtNow.Minute;
-                MinuteChanged(null, e);
+                MinuteChanged(dtNow.Hour, dtNow.Minute);
             }
         }
 

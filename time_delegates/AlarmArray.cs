@@ -13,11 +13,11 @@ namespace time_delegates
             LoadAlarms();
         }
 
-        public static void Execute(object source, TimeEventArgs e)
+        public static void Execute(int hour, int minute)
         {
             foreach (Alarm alarm in _alarmList)
             {
-                alarm.Execute(e.Dt.Hour, e.Dt.Minute);
+                alarm.Execute(hour, minute);
             }
         }
 
