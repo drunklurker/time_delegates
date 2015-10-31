@@ -9,7 +9,6 @@ namespace time_delegates
         public static readonly object LockCrutch = new object();
         static void Main(string[] args)
         {
-            AlarmArray.LoadAlarms();
             Menu menu = new Menu();
             Thread timeThread = new Thread(CurrentTime.MainTime);
             

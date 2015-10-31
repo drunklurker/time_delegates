@@ -56,7 +56,6 @@ namespace time_delegates
         private static void PushTime()
         {
             DateTime dtNow = DateTime.Now;
-            TimeEventArgs e = new TimeEventArgs();
             SecondChanged(dtNow.Hour, dtNow.Minute, dtNow.Second);
             if (dtNow.Minute != _currentMinute)
             {
